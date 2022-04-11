@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应 -->
+<mapper namespace="com.eatery.cd.mapper.EchartsMapper">
+
+    <select id="findAll" resultMap="ProRM">
+        SELECT  * FROM product_p;
+
+    </select>
+    <resultMap id="ProRM" type="Product" autoMapping="true">
+
+        <id column="product_id" property="productId"/>
+        <id column="product_name" property="productName"/>
+        <id column="product_kind_id" property="productKindId"/>
+        <id column="buy_count" property="buyCount" />
+    </resultMap>
+    <select id="findAllAddr" resultType="com.eatery.cd.pojo.OrderAddCount">
+     SELECT addresinfo,COUNT(*) count FROM `order_p` GROUP BY addresinfo;
+
+    </select>
+
+</mapper>

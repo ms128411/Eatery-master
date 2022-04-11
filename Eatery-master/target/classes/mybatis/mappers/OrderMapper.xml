@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应  -->
+<mapper namespace="com.eatery.cd.mapper.OrderMapper">
+
+    <!--按用户id查询订单-->
+    <select id="findOrderListByUserId" resultMap="orderRM">
+        SELECT * FROM
+
+        (SELECT o.order_id,o.orderdate,o.orderstatus,o.addresinfo,o.user_id,o.money,op.product_id,op.buynum FROM order_p
+        o LEFT JOIN product_order_p op ON o.`order_id` = op.`order_id`) o
+
+        LEFT JOIN
+
+        (SELECT p.product_id,p.product_name,p.price,p.sprice,p.pic,p.description,p.special,p.buy_count,pkp.name FROM
+        product_p p LEFT JOIN product_kind_p pkp ON p.`product_id` = pkp.`product_id`) p
+
+        ON o.product_id = p.product_id WHERE o.user_id = #{userId} order by o.orderdate desc
+    </select>
+
+    <!--查询所有订单-->
+    <select id="findOrderAll" resultMap="orderRM">
+       select op.order_id,op.orderstatus,pp.product_name,pop.buynum,op.money,op.orderdate,pkp.`name`,uip.telephone,uip.address
+         from user_info_p uip, order_p op,product_p pp,product_order_p pop,product_kind_p pkp
+            where op.order_id = pop.order_id and pp.product_id = pop.product_id
+                and pkp.product_kind_id = pp.product_kind_id
+                and uip.user_info_id = op.user_id order by op.orderdate DESC
+    </select>
+    <select id="findOrderTotal" resultType="Integer">
+        select count(*) from order_p;
+    </select>
+
+    <select id="findListByOrderId" resultMap="orderRM">
+        SELECT * FROM
+
+        (SELECT o.order_id,o.orderdate,o.orderstatus,o.addresinfo,o.user_id,o.money,op.product_id,op.buynum FROM order_p
+        o LEFT JOIN product_order_p op ON o.`order_id` = op.`order_id`) o
+
+        LEFT JOIN
+
+        (SELECT p.product_id,p.product_name,p.price,p.sprice,p.pic,p.description,p.special,p.buy_count,pkp.name FROM
+        product_p p LEFT JOIN product_kind_p pkp ON p.`product_id` = pkp.`product_id`) p
+
+        ON o.product_id = p.product_id WHERE o.order_id = #{orderId}
+
+    </select>
+
+
+    <resultMap id="orderRM" type="Order" autoMapping="true">
+        <id column="order_id" property="orderId"/>
+
+        <association property="product" javaType="Product" resultMap="productRM"></association>
+        <association property="productOrder" javaType="ProductOrder" resultMap="productOrderRM"></association>
+        <association property="user" javaType="User" resultMap="userRM"></association>
+    </resultMap>
+    <resultMap id="productOrderRM" type="ProductOrder" autoMapping="true">
+        <id column="order_d" property="orderId"></id>
+    </resultMap>
+
+    <resultMap id="productRM" type="Product" autoMapping="true">
+        <id column="product_id" property="productId"/>
+        <association property="productKind" javaType="ProductKind" resultMap="productKindRm"></association>
+    </resultMap>
+
+    <resultMap id="productKindRm" type="ProductKind" autoMapping="true">
+        <id column="product_kind_id" property="productKindId"></id>
+    </resultMap>
+
+    <resultMap id="userRM" type="User" autoMapping="true">
+        <id column="user_id" property="userId"/>
+        <association property="userInfo" javaType="UserInfo" resultMap="userInfoRM"></association>
+    </resultMap>
+
+    <resultMap id="userInfoRM" type="UserInfo" autoMapping="true">
+        <id column="user_info_id" property="userInfoId"/>
+    </resultMap>
+
+
+    <insert id="saveToProductOrder">
+        insert into product_order_p values(
+        #{orderId},
+        #{productId},
+        #{buyNum}
+        )
+    </insert>
+
+    <select id="findPrdouctByOrderId" resultType="string">
+        select * from product_order_p where order_id = #{orderId}
+    </select>
+
+    <insert id="saveOrder">
+        insert into order_p values(
+        #{orderId},
+        #{orderDate},
+        #{orderStatus},
+        #{addResInfo},
+        #{userId},
+        #{money},
+        #{price}
+        )
+    </insert>
+    <update id="updateOrderStatus">
+
+        update order_p set orderstatus = #{status} where order_id = #{orderId}
+
+    </update>
+
+
+    <delete id="deleteOrder">
+        DELETE  FROM order_p where order_id = #{orderId}
+    </delete>
+    <delete id="deleteOrderAndProduct">
+        DELETE  from product_order_p where order_id = #{orderId}
+    </delete>
+
+    <update id="updateProductNum">
+        update product_p set buy_count = buy_count - #{buyCount}
+    </update>
+
+
+</mapper>

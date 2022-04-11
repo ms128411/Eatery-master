@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应  -->
+<mapper namespace="com.eatery.cd.mapper.LeaveMapper">
+
+	<select id="findAllLeaveList" resultMap="leaveRM">
+                         select
+                            l.*,u.username
+                         from
+                            leave_p l
+                            left join
+                            user_p  u
+                            on
+                            l.user_id =u.user_id
+
+	 </select>
+	<!--封装商品信息表  -->
+	<resultMap type="Leave" id="leaveRM" autoMapping="true">
+		<id column="Leave_id" property="leaveId"/>
+
+		<!--一对一封装 user  -->
+		<association property="user" javaType="User">
+			<id column="user_id" property="userId"/>
+			<result column="username" property="username"/>
+		</association>
+
+	</resultMap>
+
+	<delete id="deleteById">
+		delete  from
+		leave_p
+		where
+		leave_id=#{leaveId}
+
+	</delete>
+
+	<!--数组array-->
+	<delete id="deleteAll">
+		delete from
+		leave_p
+		where
+		leave_id in
+		<foreach collection="array" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+
+	</delete>
+
+	<update id="updateAll">
+		update leave_p
+		set
+		state=#{state}
+		where
+		leave_id  in
+		<foreach collection="leaveIds" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+	</update>
+	<update id="updateStateOnlyOne">
+		update leave_p set state = #{state} where leave_id = #{leaveId}
+	</update>
+
+	<select id="findConditionLeaveList" resultMap="leaveRM">
+		select
+		l.*,u.username
+		from
+		leave_p l
+		left join
+		user_p  u
+		on
+		l.user_id =u.user_id
+		WHERE
+		username LIKE CONCAT('%',#{username},'%')
+
+	</select>
+	<insert id="createLeave">
+		INSERT  INTO leave_p(leave_id,user_id,content,leavedate,state) VALUE (
+			#{leaveId},#{user.userId},#{content},#{leaveDate},#{state}
+		)
+	</insert>
+
+</mapper>

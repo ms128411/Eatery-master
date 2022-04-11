@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应  -->
+<mapper namespace="com.eatery.cd.mapper.EvaMapper">
+
+	<!--查找所有评价-->
+	<!--SELECT  * from evaluate_p-->
+	<select id="findAllEvaList" resultMap="EvaluateRM">
+
+	  SELECT  order_id,product_name,eva_content,eva_date,ans_content,ans_date from evaluate_p order by eva_date desc
+
+	 </select>
+	<!--封装用户评价信息  -->
+	<resultMap type="Evaluate" id="EvaluateRM" autoMapping="true">
+		<id column="order_id" property="orderId"/>
+	</resultMap>
+	<update id="saveEva">
+		INSERT  INTO  evaluate_p VALUES (
+			#{orderId},
+			#{productName},
+			#{evaContent},
+			#{evaDate},
+			NULL,
+			NULL
+		)
+	</update>
+	<select id="findEvaListByOrderId" resultMap="EvaluateRM">
+		SELECT  * from evaluate_p where order_id = #{orderId}
+	</select>
+	<update id="saveAnsEva">
+	update evaluate_p SET ans_content = #{ansContent},ans_Date = #{ansDate} where order_id = #{orderId}
+	</update>
+	<select id="find2Eva" resultMap="EvaluateRM">
+		select * from  evaluate_p LIMIT 2
+	</select>
+</mapper>

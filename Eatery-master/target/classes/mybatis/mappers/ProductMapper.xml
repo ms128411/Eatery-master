@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应  -->
+<mapper namespace="com.eatery.cd.mapper.ProductMapper">
+
+    <select id="findAllProductList" resultMap="productRM">
+		select p.*,pk.name from product_p p left join product_kind_p pk on p.product_kind_id = pk.product_kind_id
+	</select>
+    <resultMap id="productKindRM" type="com.eatery.cd.pojo.ProductKind" autoMapping="true">
+        <id column="product_kind_id" property="productKindId"/>
+    </resultMap>
+    <!--封装商品信息表  -->
+    <resultMap type="com.eatery.cd.pojo.Product" id="productRM" autoMapping="true">
+        <id column="product_id" property="productId"/>
+
+        <!--一对一封装  productKind  -->
+        <association property="productKind" javaType="com.eatery.cd.pojo.ProductKind">
+            <id column="product_kind_id" property="productKindId"/>
+            <result column="name" property="name"/>
+        </association>
+
+    </resultMap>
+
+    <select id="findAllProductKindNameList" resultMap="productKindRM">
+		select * from  product_kind_p
+	</select>
+
+    <select id="findHotProductList" resultMap="productRM">
+		select p.*,pk.name from product_p p left join product_kind_p pk on p.product_kind_id = pk.product_kind_id  order by buy_count desc limit 2
+	</select>
+
+    <select id="findProductByCondition" resultMap="productRM">
+        select p.*,pk.name from product_p p left join product_kind_p pk on p.product_kind_id = pk.product_kind_id
+        where 1=1
+        <if test="product_name !=null">
+            and p.product_name like CONCAT('%',#{product_name},'%' )
+        </if>
+        <if test="name !=null">
+            and pk.name like CONCAT('%',#{name},'%' )
+        </if>
+        <if test="minprice !=null">
+            and p.price &gt;= #{minprice}
+        </if>
+        <if test="maxprice !=null">
+            and p.price &lt;= #{maxprice}
+        </if>
+    </select>
+    <select id="searchByConditition" resultMap="productRM">
+		select * from product_p where
+			 product_name LIKE CONCAT('%',#{keyword},'%')
+	</select>
+    <select id="findProductByCategory" resultMap="productRM">
+		select p.*,pk.name from product_p p left join product_kind_p pk on p.product_kind_id = pk.product_kind_id
+		WHERE pk.product_kind_id = #{productKindId}
+	</select>
+
+
+    <select id="findProductById" resultType="com.eatery.cd.pojo.Product">
+		SELECT * FROM product_p where product_id = #{productId}
+	</select>
+
+    <select id="findProductsById" resultType="com.eatery.cd.pojo.Product">
+        SELECT * from product_p where product_id in (
+        <foreach collection="array" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+    <select id="findCardProductsById" resultType="com.eatery.cd.pojo.Product">
+		SELECT * FROM product_p
+	</select>
+
+
+    <select id="findThreeProductList" resultMap="productRM">
+		SELECT
+			  p.*,
+			  pk.name
+			FROM
+			  product_p p
+			  LEFT JOIN product_kind_p pk
+				ON p.product_kind_id = pk.product_kind_id
+			ORDER BY p.`buy_count` DESC
+			LIMIT 0, 3
+
+	</select>
+
+
+    <!--批量删除-->
+    <delete id="deleteAllProduct">
+        DELETE from product_p
+        where
+        product_id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!--修改单个商品-->
+    <update id="updateOne">
+		UPDATE product_p
+		set
+		description=#{description},
+		product_name=#{productName},
+		price=#{price},
+		sprice=#{sprice},
+		special =#{special},
+		product_kind_id = #{productKind.productKindId},
+		buy_count = #{buyCount}
+		where
+		product_id=#{productId}
+	</update>
+
+    <insert id="addOne">
+		insert
+		INTO product_p
+		(product_id,description,pic,buy_count,product_name,price,sprice,product_kind_id,special)
+		values
+		(
+		#{productId},
+		#{description},
+		#{pic},
+		#{buyCount},
+		#{productName},
+		#{price},
+		#{sprice},
+
+		#{productKind.productKindId},
+		#{special}
+		)
+	</insert>
+
+
+    <delete id="deleteById">
+		DELETE  FROM  product_p
+		where
+		product_id=#{thisId}
+	</delete>
+
+
+    <select id="findAllKind" resultType="com.eatery.cd.pojo.ProductKind">
+		SELECT  * from
+		product_kind_p
+	</select>
+
+
+    <select id="findAllProductCondition" resultMap="productRM">
+		select p.*,pk.name from product_p p left join product_kind_p pk on p.product_kind_id = pk.product_kind_id
+		WHERE
+		product_name LIKE CONCAT('%',#{Pname},'%')
+	</select>
+	<select id="findProductByName" resultType="com.eatery.cd.pojo.Product"></select>
+
+
+</mapper>

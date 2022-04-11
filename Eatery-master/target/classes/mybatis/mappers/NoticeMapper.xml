@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应  -->
+<mapper namespace="com.eatery.cd.mapper.NoticeMapper">
+
+	<!--前台-->
+	<select id="findAll" resultType="com.eatery.cd.pojo.Notice">
+		SELECT * FROM  notice where state = 1
+	</select>
+
+	<!--后台-->
+	<select id="findAll1" resultType="com.eatery.cd.pojo.Notice">
+		SELECT * FROM  notice
+	</select>
+
+	<delete id="deleteNotices">
+		delete from notice where notice_id IN (
+		<foreach collection="array" item="id" separator=",">#{id}</foreach>
+		)
+	</delete>
+
+	<insert id="addNotice">INSERT  INTO  notice VALUES (
+		#{noticeId},#{title},#{content},#{noticetime},#{state}
+		)</insert>
+
+	<insert id="updateState">
+		update notice set state = #{state} where notice_id  in
+		<foreach collection="noticeIds" item="id" separator="," open="("  close=")" >#{id}</foreach>
+	</insert>
+
+	<update id="updateNotice">
+		UPDATE notice set state = #{state},content=#{content},title=#{title} WHERE notice_id = #{noticeId}
+	</update>
+</mapper>

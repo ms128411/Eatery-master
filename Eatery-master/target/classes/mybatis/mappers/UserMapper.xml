@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--保证接口和映射文件一一对应  -->
+<mapper namespace="com.eatery.cd.mapper.UserMapper">
+    <select id="findUserInfo" resultMap="userRM">
+        select * from
+        (select user_id ,username,upassword from user_p) u
+        left join
+        (select user_info_id,real_name ,telephone ,address,zip,score,state,email  from user_info_p) p
+        on u.user_id = p.user_info_id where user_id =#{userId}
+    </select>
+
+
+    <resultMap id="userRM" type="User" autoMapping="true">
+        <id column="user_id" property="userId"/>
+        <association property="userInfo" javaType="UserInfo" resultMap="userInfoRM">
+            <!--<id column="user_info_id" property="userInfoId"/>-->
+        </association>
+    </resultMap>
+
+    <update id="updateAddress">
+        update user_info_p set
+        address = #{address},
+        real_name = #{realName},
+        telephone = #{telephone},
+        zip = #{zip}
+        where user_info_id = #{userInfoId}
+    </update>
+
+    <update id="updatePwd">
+        update user_p set upassword = #{comfirmPwd}
+    </update>
+
+    <update id="updateTel">
+        update user_info_p set telephone = #{newTel} where user_info_id = #{userId}
+    </update>
+
+    <update id="deleteTel">
+        update user_info_p set telephone = "" where user_info_id = #{userId}
+    </update>
+
+    <update id="updateEmail">
+        update user_info_p set email = #{newEmail} where user_info_id = #{userId}
+    </update>
+
+
+    <!-- 根据用户信息查找用户 -->
+    <select id="findUserByUserId" resultMap="UserRM">
+        select * from user_p left join user_info_p on user_id=#{userId} where user_id=user_info_p.user_info_id
+    </select>
+
+    <resultMap id="UserRM" type="User" autoMapping="true">
+        <id column="user_Id" property="userId"/>
+
+        <!--一对一封装  role  -->
+        <association property="role" javaType="Role">
+            <id column="role_id" property="roleId"/>
+            <result column="role_name" property="roleName"/>
+        </association>
+
+        <association property="userInfo" javaType="UserInfo" resultMap="userInfoRM"/>
+    </resultMap>
+
+
+    <!-- 表示封装userInfo对象 -->
+    <resultMap type="UserInfo" id="userInfoRM" autoMapping="true">
+        <!-- 封装主键对象 -->
+        <id column="user_info_id" property="userInfoId"/>
+    </resultMap>
+
+    <!-- 根据用户表 -->
+    <update id="updateUser">
+        update user_p
+        <set>
+            <if test="username != null">username=#{username},</if>
+            <if test="upassword != null">upassword=#{upassword},</if>
+        </set>
+        where user_id=#{userId}
+    </update>
+
+    <!--后台- 查询所有的用户 -->
+    <select id="findAdminList" resultMap="UserRM">
+        select * from user_p left join
+        (select * from user_info_p left join
+        (select urp.user_id,urp.role_id,r.role_name from user_role_p urp left join
+        (select * from role_p where role_name='超级管理员' or role_name='普通用户')r
+        on urp.role_id = r.role_id)u
+        on user_info_id = u.user_id)uip
+        on user_p.user_id=uip.user_id  where user_p.user_id=uip.user_id
+    </select>
+
+    <select id="findAdminRole" resultType="string">
+        select role_name from role_p where role_id in (
+        select role_id from user_role_p where user_id=#{userId}
+        )
+    </select>
+
+    <!--添加用户-->
+    <insert id="addUser">
+        insert into user_p values(#{userId}, #{username}, #{upassword})
+    </insert>
+
+    <delete id="deleteAdminsById">
+        delete from user_p where user_id in (
+        <foreach collection="array" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+
+
+    <select id="findUserByUsername" resultMap="UserRM">
+        select * from user_p left join user_info_p on username like concat('%',#{username},'%') where user_id=user_info_p.user_info_id
+    </select>
+
+    <delete id="deleteAdminById">
+        delete from user_p where user_id = #{userId}
+    </delete>
+
+    <select id="findUserByU_P" resultType="com.eatery.cd.pojo.User">
+        SELECT * from user_p where  username=#{username} and upassword=#{password}
+    </select>
+
+
+    <!--登录-->
+    <!-- SELECT * from user_p where username=#{username}-->
+    <!--select * from user_p left join user_info_p on user_id=#{userId} where user_id=user_info_p.user_info_id-->
+    <!--update user_info_p SET state=? where user_info_id=? -->
+    <select id="finuserByUsername" resultType="com.eatery.cd.pojo.User">
+        select * from user_p left join user_info_p on username=#{username} where user_id=user_info_p.user_info_id and state = 1
+    </select>
+
+
+
+
+    <!--前端用户注册-->
+    <insert id="registerUser">
+        insert into user_p
+        VALUES(#{userId},#{username},#{upassword})
+
+    </insert>
+
+    <!--前端用户注册-->
+    <insert id="registerRole">
+        insert into user_role_p VALUE (#{userId},'2')
+    </insert>
+
+    <!--前端用户注册-->
+    <insert id="registerUserInfo">
+        insert into user_info_p
+        VALUES (
+        #{userInfoId},
+        #{realName,jdbcType=VARCHAR},
+        #{telephone},
+        #{email},
+        #{address,jdbcType=VARCHAR},
+        #{zip,jdbcType=INTEGER},
+        #{score,jdbcType=VARCHAR},
+        1
+        )
+    </insert>
+</mapper>
