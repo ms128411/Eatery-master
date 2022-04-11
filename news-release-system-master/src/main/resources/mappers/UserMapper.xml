@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.togogo.dao.UserDao">
+
+    <select id="getAllUser" resultType="net.togogo.domain.User" parameterType="int">
+        select * from user order by userType,userID asc
+    </select>
+
+    <select id="getUserByUP" resultType="net.togogo.domain.User">
+        select * from user where userName=#{param1} and password=#{param2}
+    </select>
+
+    <select id="getUserByID" resultType="net.togogo.domain.User">
+        select * from user where userID=#{param1}
+    </select>
+
+    <insert id="addUser" parameterType="net.togogo.domain.User">
+        insert into user(userName,password,userType) value(#{userName},#{password},#{userType})
+    </insert>
+
+    <delete id="deleteUserByIds" parameterType="list">
+        delete from user where userID in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="passwordUpdate" parameterType="object">
+        update user set password = #{param3} where userID=#{param1} and password=#{param2}
+    </update>
+
+    <update id="powerUpdate" parameterType="int">
+        update user set userType = #{param2} where userID=#{param1}
+    </update>
+
+    <select id="searchUser" parameterType="string" resultType="net.togogo.domain.User">
+        select *
+        from user
+        <where>
+            <if test="userID!=null">
+                and userID = #{userID}
+            </if>
+            <if test="userName!=null and userName!=''">
+                and userName like concat('%',#{userName},'%')
+            </if>
+            <if test="userType!=null">
+                and userType = #{userType}
+            </if>
+        </where>
+        order by userType,userID asc
+    </select>
+</mapper>

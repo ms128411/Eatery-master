@@ -1,0 +1,47 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "welcome"
+  },
+  "logoInfo": {
+    "title": "新闻发布系统",
+    "image": "images/favicon.ico",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "新闻管理",
+      "icon": "fa fa-bars",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "新闻编辑",
+          "href": "newsInfoIndex",
+          "icon": "fa fa-book",
+          "target": "_self"
+        },
+        {
+          "title": "类型管理",
+          "href": "newsTypeIndex",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        }
+      ]
+    },
+    {
+      "title": "用户管理",
+      "icon": "fa fa-bars",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "用户编辑",
+          "href": "userIndex",
+          "icon": "fa fa-user-circle-o",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

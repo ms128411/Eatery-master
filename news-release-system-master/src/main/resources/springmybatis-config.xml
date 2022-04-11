@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--扫描Spring组件所在的包-->
+    <context:component-scan base-package="net.togogo.service"/>
+
+    <!--读取数据库连接信息文件：db.properties-->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!--声明数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="${mysql_driver}"/>
+        <property name="url" value="${mysql_url}"/>
+        <property name="username" value="${mysql_user}"/>
+        <property name="password" value="${mysql_password}"/>
+    </bean>
+
+    <!--构建sqlSessionFactory对象-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:/mappers/*.xml"/>
+
+        <!--分页插件-->
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <props>
+                            <!--页号在合理值 0 - max-->
+                            <prop key="reasonable">true</prop>
+                        </props>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+
+    <!--扫描dao类，将其注入到容器当中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="net.togogo.dao"/>
+    </bean>
+</beans>

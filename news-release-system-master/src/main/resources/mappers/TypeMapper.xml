@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.togogo.dao.TypeDao">
+
+    <select id="getAllType" resultType="net.togogo.domain.Type" >
+        select * from Type
+
+    </select>
+    <select id="getAllType2" resultType="String" >
+        select newsType from Type
+
+   </select>
+
+        <select id="getTypeByNy" resultType="net.togogo.domain.Type">
+            select * from type where newsType like "%"#{newsType}"%"
+        </select>
+
+    <update id="updateNt" parameterType="object" >
+update type set newsType = #{param2}
+where typeID=#{param1}
+</update>
+
+    <insert id="addType">
+insert into type(newsType) values(#{param1})
+</insert>
+    <delete parameterType="list" id="deleteType">
+        delete from type where typeID in
+        <foreach   open="("  separator="," close=")"   item="id" collection="list">#{id} </foreach>
+    </delete>
+    <select id="searchType" resultType="net.togogo.domain.Type"  >
+        select * from Type where 1=1
+        <if test="newsType != null">
+            AND newsType like CONCAT('%',#{newsType},'%')
+        </if>
+    </select>
+    <select id="searchType1" resultType="net.togogo.domain.Type" >
+    select * from Type where  newsType = #{newsType}
+     </select>
+
+</mapper>
